@@ -2,9 +2,11 @@ import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
 
 export const userRegistraiton = async (req, res) => {
+	console.log("in create", req.body.password)
 	const { firstname, lastname, email, password } = req.body;
 	const generateUserName =
 		firstname + lastname + Math.floor(Math.random() * 50);
+		
 	try {
 		const user = await userModel.create({
 			firstname: firstname,

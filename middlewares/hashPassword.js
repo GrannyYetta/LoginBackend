@@ -3,14 +3,25 @@ import bcrypt from "bcrypt";
 const saltRounds = 10;
 
 export const passwordHash = (req, res, next) => {
+	console.log("middleware", req.body.password);
 	const { password } = req.body;
 
 	if (password) {
-		res.json({
-			msg: `an error has occured and the password could not be hashed`,
+		bcrypt.genSalt(saltRounds, (err, newSalt) => {
+			if (err) {
+				res.json({ msg: "error in genSalt" });
+			} else {
+				bcrypt.hash(password, newSalt, (err, hashedPassword) => {
+					if (err) {
+						res.json({ msg: `an error has occured`, err });
+					} else {
+						req.body.password = hashedPassword;
+						next();
+					}
+				});
+			}
 		});
 	} else {
-		req.body.password = passwordHash;
-		next();
+		res.json({ msg: `the password is missing` });
 	}
 };
