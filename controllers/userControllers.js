@@ -1,12 +1,14 @@
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import "dotenv/config.js";
 
 export const userRegistraiton = async (req, res) => {
-	console.log("in create", req.body.password)
+	console.log("in create", req.body.password);
 	const { firstname, lastname, email, password } = req.body;
 	const generateUserName =
 		firstname + lastname + Math.floor(Math.random() * 50);
-		
+
 	try {
 		const user = await userModel.create({
 			firstname: firstname,
@@ -39,6 +41,15 @@ export const userLogin = async (req, res) => {
 				console.log(result);
 
 				if (result) {
+					//JWT sign
+					console.log("secret", process.env.JWT_SECRET);
+					const token = jwt.sign({ user: user }, process.env.JWT_SECRET, {
+						expiresIn: "1h",
+					});
+					res.cookie("jwtToken", token, {
+						httpOnly: true,
+					});
+
 					res.json({ msg: `login successful`, user });
 				} else {
 					res.json({ msg: `this password is wrong`, err });
@@ -74,4 +85,13 @@ export const userDeletetion = async (req, res) => {
 	} catch (error) {
 		res.status(500).json({ msg: error.message });
 	}
+};
+
+export const accessUserProfile = async (req, res) => {
+	const data = req.userStatus;
+
+	if (data != "authenticated") {
+		res.json({ msg: "not authenticated" });
+	}
+	res.json({ msg: data });
 };
