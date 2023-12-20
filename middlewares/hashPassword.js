@@ -7,21 +7,12 @@ export const passwordHash = (req, res, next) => {
 	const { password } = req.body;
 
 	if (password) {
-		bcrypt.genSalt(saltRounds, (err, newSalt) => {
+		bcrypt.hash(password, saltRounds, (err, passwordHash) => {
 			if (err) {
-				res.json({ msg: "error in genSalt" });
+				res.json({ msg: "Something went wrong with password hashing" });
 			} else {
-				bcrypt.hash(password, newSalt, (err, hashedPassword) => {
-					if (err) {
-						res.json({ msg: `an error has occured`, err });
-					} else {
-						req.body.password = hashedPassword;
-						next();
-					}
-				});
+				req.body.password = passwordHash;
 			}
 		});
-	} else {
-		res.json({ msg: `the password is missing` });
 	}
 };
